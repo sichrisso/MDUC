@@ -1,0 +1,165 @@
+.dashboard-container {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+.main-flex {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* LEFT: Filters */
+.filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 250px;
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: 2px solid #ccc;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.patient {
+  background-color: #f8d7da;
+}
+
+.radiation {
+  background-color: #d1e0f0;
+}
+
+.urologic {
+  background-color: #fdf3d5;
+}
+
+/* RIGHT: Chart Area */
+.chart-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 10px 15px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.radar {
+  background-color: #003366;
+}
+
+.violin {
+  background-color: #66aadd;
+}
+
+.next-steps {
+  background-color: #f6c213;
+  color: black;
+}
+
+.dashboard-visual {
+  flex: 1;
+  border: 5px solid #003366;
+  background-color: #f5f5f5;
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.patient-dropdown {
+  background-color: #d3d3d3;
+  padding: 5px;
+  margin-left: 10px;
+  border-left: 2px solid #999;
+}
+
+.patient-entry {
+  padding: 4px 10px;
+  font-weight: bold;
+  color: #333;
+}
+.submit-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-weight: bold;
+  background-color: #003366;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.patient-dropdown {
+  background-color: #d3d3d3;
+  padding-left: 10px;
+  border-left: 2px solid #999;
+  margin-bottom: 10px;
+}
+
+.patient-entry {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  font-weight: bold;
+  color: #333;
+}
+
+.submit-btn {
+  padding: 10px 20px;
+  font-weight: bold;
+  background-color: #003366;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.tabs {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.tab {
+  padding: 10px 15px;
+  border: none;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.radar {
+  background-color: #003366;
+}
+
+.violin {
+  background-color: #66aadd;
+}
+
+.next-steps {
+  background-color: #f6c213;
+  color: black;
+}
+
+.tab.active {
+  outline: 3px solid #ffcc00;
+}
