@@ -67,7 +67,7 @@ const SurveyRadarPanel: React.FC<Props> = ({
     });
 
   const dataFull = {
-    labels: questionKeys.map((q, i) => `Question ${i + 1}`),
+    labels: questionKeys.map((_, i) => `Question ${i + 1}`),
     datasets: [
       {
         label: "Patient",

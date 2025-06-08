@@ -77,7 +77,7 @@ const RadarDashboard: React.FC = () => {
   /* handlers ------------------------------------------------------ */
   const toggle = (
     id: string,
-    list: string[],
+    _list: string[],
     setter: React.Dispatch<React.SetStateAction<string[]>>
   ) =>
     setter((prev) =>
