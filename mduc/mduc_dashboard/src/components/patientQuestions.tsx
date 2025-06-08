@@ -1,191 +1,196 @@
-import React, { useState } from "react";
-import type { Patient } from "../types";
+import React, { useMemo, useState } from "react";
+import type { SurveyRow } from "../types";
 
-interface PatientQuestionsProps {
-  onSubmit: (matches: string[], fullData: Patient[]) => void;
+interface Props {
+  patients: SurveyRow[]; // only rows where role === Patient
+  onSubmit: (ids: string[], rows: SurveyRow[]) => void;
 }
 
-const mockPatients: Patient[] = [
-  {
-    id: "P1",
-    age: "< 50",
-    race: "White",
-    score: 3,
-    radiationOncologist: "RO #1",
-    urologicOncologist: "UO #1",
-  },
-  {
-    id: "P2",
-    age: "60-70",
-    race: "Black or African American",
-    score: 2,
-    radiationOncologist: "RO #2",
-    urologicOncologist: "UO #1",
-  },
-  {
-    id: "P3",
-    age: "50-60",
-    race: "Asian",
-    score: 4,
-    radiationOncologist: "RO #1",
-    urologicOncologist: "UO #2",
-  },
-  {
-    id: "P4",
-    age: "70-80",
-    race: "White",
-    score: 1,
-    radiationOncologist: "RO #3",
-    urologicOncologist: "UO #3",
-  },
-  {
-    id: "P5",
-    age: ">80",
-    race: "Asian",
-    score: 3,
-    radiationOncologist: "RO #2",
-    urologicOncologist: "UO #4",
-  },
-  {
-    id: "P6",
-    age: "< 50",
-    race: "Black or African American",
-    score: 5,
-    radiationOncologist: "RO #1",
-    urologicOncologist: "UO #2",
-  },
+/* ---- static pick-lists ------------------------------------------ */
+const AGE_BUCKETS = ["< 50", "50-60", "60-70", "70-80", ">80"];
+const RACES = [
+  "Black or African American",
+  "White",
+  "Asian",
+  "American Indian or Alaska Native",
+];
+const APPT_BUCKETS = ["0-3 months ago", "3-6 months ago", ">6 months ago"];
+const NEXT_STEPS = [
+  "Still deciding",
+  "Further workup",
+  "Active surveillance",
+  "Radiation",
+  "Surgery",
 ];
 
-const PatientQuestions: React.FC<PatientQuestionsProps> = ({ onSubmit }) => {
-  const [selectedAges, setSelectedAges] = useState<string[]>([]);
-  const [selectedRaces, setSelectedRaces] = useState<string[]>([]);
-  const [appointmentDate, setAppointmentDate] = useState<string>("");
-  const [distance, setDistance] = useState<number>(50);
-  const [selectedNextSteps, setSelectedNextSteps] = useState<string[]>([]);
-  const [scoreUnder3, setScoreUnder3] = useState(false);
+const PatientQuestions: React.FC<Props> = ({ patients, onSubmit }) => {
+  /* local UI state ------------------------------------------------- */
+  const [ages, setAges] = useState<string[]>([]);
+  const [races, setRaces] = useState<string[]>([]);
+  const [apptBucket, setApptBucket] = useState<string>("");
+  const [distance, setDistance] = useState<number>(200);
+  const [nextSteps, setNextSteps] = useState<string[]>([]);
+  const [scoreFlag, setScoreFlag] = useState(false);
 
-  const toggleValue = (
+  const toggle = (
     val: string,
-    setFn: React.Dispatch<React.SetStateAction<string[]>>
-  ) => {
-    setFn((prev) =>
+    setter: React.Dispatch<React.SetStateAction<string[]>>
+  ) =>
+    setter((prev) =>
       prev.includes(val) ? prev.filter((v) => v !== val) : [...prev, val]
     );
-  };
 
-  const handleSubmit = () => {
-    const matches = mockPatients.filter(
-      (p) =>
-        (!scoreUnder3 || p.score < 3) &&
-        (selectedAges.length === 0 || selectedAges.includes(p.age)) &&
-        (selectedRaces.length === 0 || selectedRaces.includes(p.race))
-    );
+  /* ---------------------------------------------------------------- */
+  const filtered = useMemo(() => {
+    const now = Date.now();
+
+    return patients.filter((p) => {
+      /* ---- age bucket ------------------------------------------- */
+      if (ages.length) {
+        const a = p.age ?? 0;
+        const match = ages.some(
+          (b) =>
+            (b === "< 50" && a < 50) ||
+            (b === "50-60" && a >= 50 && a < 60) ||
+            (b === "60-70" && a >= 60 && a < 70) ||
+            (b === "70-80" && a >= 70 && a < 80) ||
+            (b === ">80" && a >= 80)
+        );
+        if (!match) return false;
+      }
+
+      /* ---- race -------------------------------------------------- */
+      if (races.length && !races.includes(p.race ?? "")) return false;
+
+      /* ---- appointment date bucket ------------------------------ */
+      if (apptBucket) {
+        const diffDays =
+          (now - new Date(p.appointment_date).getTime()) / 86400000;
+        if (
+          (apptBucket === "0-3 months ago" && diffDays > 90) ||
+          (apptBucket === "3-6 months ago" &&
+            (diffDays < 90 || diffDays > 180)) ||
+          (apptBucket === ">6 months ago" && diffDays < 180)
+        )
+          return false;
+      }
+
+      /* ---- distance --------------------------------------------- */
+      if (distance !== 200 && (p.distance_miles ?? Infinity) > distance)
+        return false;
+
+      /* ---- next steps ------------------------------------------- */
+      if (nextSteps.length && !nextSteps.includes(p.next_steps)) return false;
+
+      /* ---- score flag ------------------------------------------- */
+      if (scoreFlag && !p.score_below_3) return false;
+
+      return true;
+    });
+  }, [patients, ages, races, apptBucket, distance, nextSteps, scoreFlag]);
+
+  /* ---------------------------------------------------------------- */
+  const submit = () =>
     onSubmit(
-      matches.map((p) => p.id),
-      matches
+      filtered.map((p) => p.id),
+      filtered
     );
-  };
 
+  /* ---------------------------------------------------------------- */
   return (
     <div className="patient-questions">
-      <h2>Patient Details</h2>
+      <h2>Patient Filters</h2>
 
+      {/* AGE ------------------------------------------------------- */}
       <fieldset>
         <legend>Age</legend>
-        {["< 50", "50-60", "60-70", "70-80", ">80"].map((age) => (
+        {AGE_BUCKETS.map((age) => (
           <label key={age}>
             <input
               type="checkbox"
-              checked={selectedAges.includes(age)}
-              onChange={() => toggleValue(age, setSelectedAges)}
+              checked={ages.includes(age)}
+              onChange={() => toggle(age, setAges)}
             />
             {age}
           </label>
         ))}
       </fieldset>
 
+      {/* RACE ------------------------------------------------------ */}
       <fieldset>
         <legend>Race</legend>
-        {[
-          "Black or African American",
-          "White",
-          "Asian",
-          "American Indian or Alaska Native",
-        ].map((race) => (
-          <label key={race}>
+        {RACES.map((r) => (
+          <label key={r}>
             <input
               type="checkbox"
-              checked={selectedRaces.includes(race)}
-              onChange={() => toggleValue(race, setSelectedRaces)}
+              checked={races.includes(r)}
+              onChange={() => toggle(r, setRaces)}
             />
-            {race}
+            {r}
           </label>
         ))}
       </fieldset>
 
+      {/* APPOINTMENT DATE ----------------------------------------- */}
       <fieldset>
         <legend>Date of Appointment</legend>
-        {["0-3 months ago", "3-6 months ago", ">6 months ago"].map((time) => (
-          <label key={time}>
+        {APPT_BUCKETS.map((b) => (
+          <label key={b}>
             <input
               type="radio"
-              name="appointment"
-              value={time}
-              checked={appointmentDate === time}
-              onChange={(e) => setAppointmentDate(e.target.value)}
+              name="appt"
+              value={b}
+              checked={apptBucket === b}
+              onChange={(e) => setApptBucket(e.target.value)}
             />
-            {time}
+            {b}
           </label>
         ))}
       </fieldset>
 
+      {/* DISTANCE -------------------------------------------------- */}
       <fieldset>
-        <legend>Distance from Hospital</legend>
+        <legend>Max Distance ({distance} miles)</legend>
         <input
           type="range"
-          min="0"
+          min="5"
           max="200"
           step="5"
           value={distance}
-          onChange={(e) => setDistance(parseInt(e.target.value))}
+          onChange={(e) => setDistance(+e.target.value)}
         />
-        <div>&lt;5 miles — &gt;200 miles: {distance} miles</div>
       </fieldset>
 
+      {/* NEXT STEPS ---------------------------------------------- */}
       <fieldset>
         <legend>Next Steps (MDUC)</legend>
-        {[
-          "Still deciding",
-          "Further workup",
-          "Active surveillance",
-          "Radiation",
-          "Surgery",
-        ].map((step) => (
-          <label key={step}>
+        {NEXT_STEPS.map((n) => (
+          <label key={n}>
             <input
               type="checkbox"
-              checked={selectedNextSteps.includes(step)}
-              onChange={() => toggleValue(step, setSelectedNextSteps)}
+              checked={nextSteps.includes(n)}
+              onChange={() => toggle(n, setNextSteps)}
             />
-            {step}
+            {n}
           </label>
         ))}
       </fieldset>
 
+      {/* SCORE FLAG ---------------------------------------------- */}
       <fieldset>
-        <legend>Score of 3 or less</legend>
+        <legend>Score ≤ 3 on any question</legend>
         <label>
           <input
             type="checkbox"
-            checked={scoreUnder3}
-            onChange={(e) => setScoreUnder3(e.target.checked)}
+            checked={scoreFlag}
+            onChange={(e) => setScoreFlag(e.target.checked)}
           />
-          Score of 3 or less on any survey question
+          Yes
         </label>
       </fieldset>
 
-      <button className="submit-btn" onClick={handleSubmit}>
-        Submit
+      <button className="submit-btn" onClick={submit}>
+        Apply Filters
       </button>
     </div>
   );

@@ -19,7 +19,7 @@ ChartJS.register(
   Legend
 );
 
-interface SurveyRadarChartProps {
+interface Props {
   labels: string[];
   data: number[];
   title?: string;
@@ -27,22 +27,23 @@ interface SurveyRadarChartProps {
   height?: number;
 }
 
-const SurveyRadarChart: React.FC<SurveyRadarChartProps> = ({
+const SurveyRadarChart: React.FC<Props> = ({
   labels,
   data,
-  title,
-  width = 300,
-  height = 300,
+  title = "Survey Score",
+  width = 350,
+  height = 350,
 }) => {
   const chartData = {
     labels,
     datasets: [
       {
-        label: title || "Survey Score",
+        label: title,
         data,
-        backgroundColor: "rgba(0, 102, 204, 0.2)",
+        backgroundColor: "rgba(0, 102, 204, 0.25)",
         borderColor: "rgba(0, 102, 204, 1)",
         borderWidth: 2,
+        pointRadius: 3,
       },
     ],
   };
@@ -50,10 +51,7 @@ const SurveyRadarChart: React.FC<SurveyRadarChartProps> = ({
   const options = {
     responsive: false,
     scales: {
-      r: {
-        beginAtZero: true,
-        max: 5,
-      },
+      r: { beginAtZero: true, max: 6 },
     },
   };
 
