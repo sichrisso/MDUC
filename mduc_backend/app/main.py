@@ -35,7 +35,7 @@ class AskRequest(BaseModel):
     question: str
 
 # ---- LOAD DATA ----
-df = pd.read_pickle("app/data/radar_survey.pkl")
+df = pd.read_csv("data/radar_survey_synthetic_data.csv")
 df["appointment_date"] = pd.to_datetime(df["appointment_date"], errors="coerce")
 logger.info(f"Loaded dataframe: {df.shape[0]} rows, {df.shape[1]} columns.")
 
