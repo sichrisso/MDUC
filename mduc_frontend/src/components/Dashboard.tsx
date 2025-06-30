@@ -133,7 +133,10 @@ const RadarDashboard: React.FC = () => {
             <span className="patient_count">{matchedPatientData.length}</span>
           </div>
           {/* PATIENT header */}
-          <div className="filter-section patient">
+          <div
+            className="filter-section patient"
+            onClick={() => pickSection("patient")}
+          >
             <label>
               <input
                 type="checkbox"
@@ -157,9 +160,7 @@ const RadarDashboard: React.FC = () => {
                 Patient
               </span>
             </label>
-            <span onClick={() => pickSection("patient")}>
-              {sections.patient ? "▲" : "▼"}
-            </span>
+            <span>{sections.patient ? "▲" : "▼"}</span>
           </div>
 
           {sections.patient && filteredPatients.length > 0 && (
