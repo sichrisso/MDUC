@@ -15,7 +15,6 @@ from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage
 
 # ---- CONFIG ----
-CSV_PATH = "data/radar_survey_synthetic_data.csv"   # Change path as needed
 EMBED_MODEL = "all-MiniLM-L6-v2"
 GROQ_MODEL = "llama3-70b-8192"
 TOP_K = 8
@@ -36,7 +35,7 @@ class AskRequest(BaseModel):
     question: str
 
 # ---- LOAD DATA ----
-df = pd.read_csv(CSV_PATH)
+df = pd.read_pickle("data/radar_survey.pkl")
 df["appointment_date"] = pd.to_datetime(df["appointment_date"], errors="coerce")
 logger.info(f"Loaded dataframe: {df.shape[0]} rows, {df.shape[1]} columns.")
 

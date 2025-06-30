@@ -1,0 +1,17 @@
+{
+  "builds": [
+    {
+      "src": "ask_agent.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "ask_agent.py"
+    }
+  ],
+  "env": {
+    "GROQ_API_KEY": "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"
+  }
+}
