@@ -7,3 +7,8 @@ chromadb
 langchain
 langchain_groq
 pydantic
+
+
+
+
+
