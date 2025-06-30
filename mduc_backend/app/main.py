@@ -25,6 +25,10 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI()
+@app.get("/")
+async def root():
+    return {"message": "FastAPI backend is running."}
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"], allow_credentials=True,
