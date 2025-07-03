@@ -33,7 +33,7 @@ const PatientQuestions: React.FC<Props> = ({ patients, onSubmit }) => {
   /* local UI state ------------------------------------------------- */
   const [ages, setAges] = useState<string[]>([]);
   const [races, setRaces] = useState<string[]>([]);
-  const [apptBucket, setApptBucket] = useState<string>("");
+  const [apptBuckets, setApptBuckets] = useState<string[]>([]);
   const [distance, setDistance] = useState<number>(400);
   const [nextSteps, setNextSteps] = useState<string[]>([]);
   const [scoreFlag, setScoreFlag] = useState(false);
@@ -69,16 +69,19 @@ const PatientQuestions: React.FC<Props> = ({ patients, onSubmit }) => {
       if (races.length && !races.includes(p.race ?? "")) return false;
 
       /* ---- appointment date bucket ------------------------------ */
-      if (apptBucket) {
+      if (apptBuckets.length) {
         const diffDays =
           (now - new Date(p.appointment_date).getTime()) / 86400000;
-        if (
-          (apptBucket === "0 - 3 months ago" && diffDays > 90) ||
-          (apptBucket === "3 - 6 months ago" &&
-            (diffDays < 90 || diffDays > 180)) ||
-          (apptBucket === "> 6 months ago" && diffDays < 180)
-        )
-          return false;
+
+        const bucketMatch = apptBuckets.some((b) => {
+          return (
+            (b === "0 - 3 months ago" && diffDays <= 90) ||
+            (b === "3 - 6 months ago" && diffDays > 90 && diffDays <= 180) ||
+            (b === "> 6 months ago" && diffDays > 180)
+          );
+        });
+
+        if (!bucketMatch) return false;
       }
 
       /* ---- distance --------------------------------------------- */
@@ -93,7 +96,7 @@ const PatientQuestions: React.FC<Props> = ({ patients, onSubmit }) => {
 
       return true;
     });
-  }, [patients, ages, races, apptBucket, distance, nextSteps, scoreFlag]);
+  }, [patients, ages, races, apptBuckets, distance, nextSteps, scoreFlag]);
 
   /* ---------------------------------------------------------------- */
   const submit = () =>
@@ -138,17 +141,14 @@ const PatientQuestions: React.FC<Props> = ({ patients, onSubmit }) => {
           </fieldset>
 
           <fieldset>
-            <legend>Date of Appointment</legend>
+            <legend>Date of Appointment (Multiple)</legend>
             {APPT_BUCKETS.map((b) => (
               <label key={b}>
                 <input
-                  type="radio"
-                  name="appt"
-                  value={b}
-                  checked={apptBucket === b}
-                  onChange={(e) => setApptBucket(e.target.value)}
+                  type="checkbox"
+                  checked={apptBuckets.includes(b)}
+                  onChange={() => toggle(b, setApptBuckets)}
                 />
-
                 <span style={{ marginLeft: "5px" }}> {b}</span>
               </label>
             ))}
